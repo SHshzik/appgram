@@ -20,6 +20,7 @@ ActiveRecord::Schema.define(version: 20200208092100) do
   create_table "rooms_users", id: false, force: :cascade do |t|
     t.integer "user_id", null: false
     t.integer "room_id", null: false
+    t.index ["room_id", "user_id"], name: "index_rooms_users_on_room_id_and_user_id"
   end
 
   create_table "users", force: :cascade do |t|
