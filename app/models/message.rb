@@ -1,5 +1,5 @@
 class Message < ApplicationRecord
   belongs_to :room
-  attribute :status, :bool, default: false
+  attribute :status, :boolean, default: false
   # status, default = false
 end
