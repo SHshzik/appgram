@@ -8,9 +8,8 @@ module Api
 
       def show
         @room = Room.find(params[:id])
-        render :json => @room
+        render json: @room
       end
     end
   end
 end
-
