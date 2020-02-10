@@ -18,7 +18,7 @@ module Api
       def create
         room = Room.new(room_params)
         if room.save
-          render json: room.to_json(include: [:users])
+          render json: room.to_json(include: [:users]) # TODO: rm include
         else
           render json: { status: false, errors: room.errors }
         end
