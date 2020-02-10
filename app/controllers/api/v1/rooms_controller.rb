@@ -6,7 +6,7 @@ module Api
       before_action :current_user
 
       def index
-        rooms = Room.includes('users').where(users: { id: @current_user })
+        rooms = Room.includes('users').where(users: { id: @current_user }).page(params[:page] || 1).per(10)
         render json: rooms
       end
 
