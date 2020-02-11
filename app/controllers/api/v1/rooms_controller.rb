@@ -10,8 +10,8 @@ module Api
         if params.include?'from'
           rooms = rooms.where(['updated_at < ?', params[:from]])
         end
-        rooms = rooms.page(params[:page] || 1).per(10)
-        render json: rooms
+        @rooms = rooms.page(params[:page] || 1).per(10)
+        render :index
       end
 
       def show
