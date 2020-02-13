@@ -5,20 +5,16 @@ module Api
       before_action :set_room
 
       def index
-        # TODO: add where
         messages = @room.messages
         render json: messages
       end
 
-      def show
-        # TODO: add 404 error handler
-        # TODO: add where
-        message = Message.find(params[:id])
-        render json: message
-      end
+      # def show
+      #   message = Message.find(params[:id])
+      #   render json: message
+      # end
 
       def create
-        # TODO: add check params
         message = Message.new(message_params)
         if message.save
           render json: message

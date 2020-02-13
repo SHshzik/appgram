@@ -1,8 +1,6 @@
 module Api
   module V1
     class RoomsController < ApplicationController
-      # TODO: add right json response
-      # TODO: rework json response with new
       before_action :current_user
 
       def index
@@ -22,7 +20,7 @@ module Api
       def create
         room = Room.new(room_params)
         if room.save
-          render json: room.to_json(include: [:users]) # TODO: rm include
+          render json: room
         else
           render json: { status: false, errors: room.errors }
         end
