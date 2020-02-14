@@ -5,8 +5,13 @@ module Api
       before_action :set_room
 
       def index
-        messages = @room.messages
-        render json: messages
+        messages = @room.messages.order(updated_at: :desc)
+        if params.include?'from'
+          messages = messages.where('updated_at < ?', DateTime.parse(params[:from]))
+        end
+        @messages = messages.page(1).per(10)
+        @last_message = @messages.last
+        render :index
       end
 
       # def show

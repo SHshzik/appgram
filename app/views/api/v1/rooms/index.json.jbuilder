@@ -1,4 +1,6 @@
-json.next_page '/api/v1/rooms?from=%s' % @last_room.updated_at.iso8601(3)
+unless @rooms.next_page.nil?
+  json.next_page "/api/v1/rooms?from=#{@last_room.updated_at.iso8601(3)}"
+end
 
 json.results do
   json.array! @rooms do |room|

@@ -8,7 +8,7 @@ module Api
         if params.include?'from'
           rooms = rooms.where('updated_at < ?', DateTime.parse(params[:from]))
         end
-        @rooms = rooms.limit(10)
+        @rooms = rooms.page(1).per(10)
         @last_room = @rooms.last
         render :index
       end
