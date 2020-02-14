@@ -6,9 +6,10 @@ module Api
       def index
         rooms = @current_user.rooms.order(updated_at: :desc)
         if params.include?'from'
-          rooms = rooms.where('updated_at <= ?', DateTime.parse(params[:from]))
+          rooms = rooms.where('updated_at < ?', DateTime.parse(params[:from]))
         end
-        @rooms = rooms.page(params[:page] || 1).per(10)
+        @rooms = rooms.limit(10)
+        @last_room = @rooms.last
         render :index
       end
 
