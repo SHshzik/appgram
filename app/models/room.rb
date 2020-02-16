@@ -9,4 +9,8 @@ class Room < ApplicationRecord
   def last_message
     messages.first.msg
   end
+
+  def last_user(user)
+    users.where.not({ id: user.id }).first
+  end
 end
