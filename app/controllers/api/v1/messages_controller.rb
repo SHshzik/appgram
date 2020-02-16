@@ -28,6 +28,13 @@ module Api
         end
       end
 
+
+      def destroy
+        message = @room.messages.where(sender_id: @current_user.id).find(params[:id])
+        message.destroy
+        render json: {}, status: :ok
+      end
+
       private
 
       def message_params
