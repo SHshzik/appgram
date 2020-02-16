@@ -3,6 +3,8 @@ module Api
     class RoomsController < ApplicationController
       before_action :current_user
 
+      # Тут возникает проблема n + 1, причём два раза. К сожалению пока не нашел ответа, как можно сделать это с помощью
+      # ORM.
       def index
         rooms = @current_user.rooms.order(updated_at: :desc)
         if params.include?'from'
