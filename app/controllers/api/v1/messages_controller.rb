@@ -21,6 +21,8 @@ module Api
 
       def create
         message = Message.new(message_params)
+        message.room = @room
+        message.sender_id = @current_user.id
         if message.save
           render json: message
         else
@@ -38,13 +40,7 @@ module Api
       private
 
       def message_params
-        params
-          .require(:message)
-          .permit(:msg)
-          .merge(
-            sender_id: @current_user.id,
-            room: Room.find(params[:message][:room])
-          )
+        params.require(:message).permit(:msg)
       end
 
       def current_user
