@@ -3,5 +3,5 @@ unless @messages.next_page.nil?
 end
 
 json.results do
-  json.array! @messages, :id, :msg, :status, :sender_id, :room, :created_at, :updated_at
+  json.array! @messages, :id, :msg, :status, :sender_id, :created_at, :updated_at
 end

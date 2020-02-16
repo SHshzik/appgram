@@ -30,6 +30,14 @@ module Api
         end
       end
 
+      def update
+        message = Message.find(params[:id])
+        if message.update_attributes(message_params)
+          render json: message
+        else
+          render json: { status: false, errors: message.errors }
+        end
+      end
 
       def destroy
         message = @room.messages.where(sender_id: @current_user.id).find(params[:id])
