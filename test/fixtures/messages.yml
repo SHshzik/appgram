@@ -4,10 +4,10 @@ one:
   msg: MyText
   status: false
   sender_id: 1
-  room: one
+  room: 1
 
 two:
   msg: MyText
   status: false
-  sender_id: 1
-  room: two
+  sender_id: 2
+  room: 1
