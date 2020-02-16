@@ -20,6 +20,12 @@ module Api
         render json: room
       end
 
+      def destroy
+        room = @current_user.rooms.find(params[:id])
+        room.destroy
+        render json: {}, status: :ok
+      end
+
       def create
         room = Room.new(room_params)
         if room.save
