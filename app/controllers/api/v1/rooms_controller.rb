@@ -3,11 +3,21 @@ module Api
     class RoomsController < ApplicationController
       before_action :current_user
 
-      # Тут возникает проблема n + 1, причём два раза. К сожалению пока не нашел ответа, как можно сделать это с помощью
-      # ORM.
+      rescue_from 'ActiveRecord::RecordNotFound' do
+        render json: {
+          status: false, message: "Комната с id №#{params[:id]} не найдена"
+        }, status: 404
+      end
+
+      rescue_from 'ActionController::ParameterMissing' do |exception|
+        render json: { status: false, message: exception.to_s }, status: 500
+      end
+
+      # Тут возникает проблема n + 1, причём два раза. К сожалению пока не нашел
+      # ответа, как можно сделать это с помощью ORM.
       def index
         rooms = @current_user.rooms.order(updated_at: :desc)
-        if params.include?'from'
+        if params.include? 'from'
           rooms = rooms.where('updated_at < ?', DateTime.parse(params[:from]))
         end
         @rooms = rooms.page(1).per(10)
