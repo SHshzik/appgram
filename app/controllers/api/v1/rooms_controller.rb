@@ -1,6 +1,7 @@
 module Api
   module V1
     class RoomsController < ApplicationController
+      PER_PAGE = 10
       before_action :current_user
 
       rescue_from 'ActiveRecord::RecordNotFound' do
@@ -18,9 +19,10 @@ module Api
         if params.include? 'from'
           rooms = rooms.where('updated_at < ?', DateTime.parse(params[:from]))
         end
-        # TODO: mv hard code
-        @has_next = rooms.count > 10
-        @rooms = rooms.limit(10)
+        per_page = PER_PAGE
+        per_page = params[:size].to_i if params.include? :size
+        @has_next = rooms.count > per_page
+        @rooms = rooms.limit(per_page)
         @last_room = @rooms.last
         render :index
       end

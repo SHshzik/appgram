@@ -1,6 +1,7 @@
 module Api
   module V1
     class MessagesController < ApplicationController
+      PER_PAGE = 10
       before_action :current_user
       before_action :set_room
 
@@ -19,9 +20,10 @@ module Api
         if params.include?'from'
           messages = messages.where('updated_at < ?', DateTime.parse(params[:from]))
         end
-        # TODO: mv hard code
-        @has_next = messages.count > 10
-        @messages = messages.limit(10)
+        per_page = PER_PAGE
+        per_page = params[:size].to_i if params.include? :size
+        @has_next = messages.count > per_page
+        @messages = messages.limit(per_page)
         @last_message = @messages.last
         render :index
       end
