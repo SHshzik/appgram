@@ -25,9 +25,6 @@ gem 'jbuilder', '~> 2.5'
 # Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin AJAX possible
 gem 'rack-cors'
 
-# For pagination
-gem 'kaminari'
-
 # For file upload
 # gem 'carrierwave'
 
