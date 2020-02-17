@@ -16,8 +16,11 @@ module Api
 
       def index
         messages = @room.messages.order(updated_at: :desc)
-        if params.include?'from'
+        if params.include? 'from'
           messages = messages.where('updated_at < ?', DateTime.parse(params[:from]))
+        end
+        if params.include? 'to'
+          messages = messages.where('updated_at > ?', DateTime.parse(params[:to]))
         end
         per_page = PER_PAGE
         per_page = params[:size].to_i if params.include? :size
