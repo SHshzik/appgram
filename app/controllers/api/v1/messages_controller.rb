@@ -2,7 +2,6 @@ module Api
   module V1
     class MessagesController < ApplicationController
       PER_PAGE = 10
-      before_action :current_user
       before_action :set_room
 
       rescue_from 'ActiveRecord::RecordNotFound' do
@@ -36,7 +35,7 @@ module Api
       def create
         message = Message.new(message_params)
         message.room = @room
-        message.sender_id = @current_user.id
+        message.sender_id = current_user.id
         if message.save
           render json: message
         else
@@ -54,7 +53,7 @@ module Api
       end
 
       def destroy
-        message = @room.messages.where(sender_id: @current_user.id).find(params[:id])
+        message = @room.messages.where(sender_id: current_user.id).find(params[:id])
         message.destroy
         render json: {}, status: :ok
       end
