@@ -13,14 +13,14 @@ module Api
         render json: { status: false, message: exception.to_s }, status: 500
       end
 
-      # Тут возникает проблема n + 1, причём два раза. К сожалению пока не нашел
-      # ответа, как можно сделать это с помощью ORM.
       def index
         rooms = @current_user.rooms.order(updated_at: :desc)
         if params.include? 'from'
           rooms = rooms.where('updated_at < ?', DateTime.parse(params[:from]))
         end
-        @rooms = rooms.page(1).per(10)
+        # TODO: mv hard code
+        @has_next = rooms.count > 10
+        @rooms = rooms.limit(10)
         @last_room = @rooms.last
         render :index
       end

@@ -19,7 +19,9 @@ module Api
         if params.include?'from'
           messages = messages.where('updated_at < ?', DateTime.parse(params[:from]))
         end
-        @messages = messages.page(1).per(10)
+        # TODO: mv hard code
+        @has_next = messages.count > 10
+        @messages = messages.limit(10)
         @last_message = @messages.last
         render :index
       end

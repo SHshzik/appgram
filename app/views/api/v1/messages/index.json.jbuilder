@@ -1,4 +1,4 @@
-unless @messages.next_page.nil?
+if @has_next
   json.next_page "/api/v1/rooms/#{@room.id}/messages?from=#{@last_message.updated_at.iso8601(3)}"
 end
 
