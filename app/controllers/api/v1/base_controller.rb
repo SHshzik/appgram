@@ -14,7 +14,7 @@ module Api
       private
 
       def data_params
-        params.permit(:from, :to, :size)
+        params.permit(:from, :to)
       end
     end
   end

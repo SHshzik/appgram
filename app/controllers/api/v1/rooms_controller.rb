@@ -3,18 +3,18 @@ module Api
     class RoomsController < BaseController
       rescue_from 'ActiveRecord::RecordNotFound' do
         render json: {
-            status: false, message: "Комната с id №#{params[:id]} не найдена"
+          status: false, message: "Комната с id №#{params[:id]} не найдена"
         }, status: 404
       end
 
-    def index
+      def index
         rooms = current_user.rooms.order(updated_at: :desc)
-        options, rooms = DataService.new(rooms, current_user).call(data_params)
+        options, rooms = GetRooms.new(rooms, current_user).call(data_params)
         render json: RoomSerializer.new(rooms, options)
       end
 
       def show
-        room = current_user.rooms.includes(:users).where(users: {id: current_user}).find(params[:id])
+        room = current_user.rooms.includes(:users).where(users: { id: current_user }).find(params[:id])
         render json: room
       end
 
@@ -29,7 +29,7 @@ module Api
         if room.save
           render json: room
         else
-          render json: {status: false, errors: room.errors}
+          render json: { status: false, errors: room.errors }
         end
       end
 
