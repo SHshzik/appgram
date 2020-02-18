@@ -10,7 +10,8 @@ module Api
 
       def index
         messages = current_room.messages.order(updated_at: :desc)
-        options, messages = DataService.new(messages, current_user).call(data_params)
+        get_messages = GetMessages.new(messages, current_user, current_room)
+        options, messages = get_messages.call(data_params)
         render json: MessageSerializer.new(messages, options)
       end
 
