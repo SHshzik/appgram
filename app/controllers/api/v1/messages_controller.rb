@@ -45,7 +45,7 @@ module Api
       end
 
       def current_room
-        @room = Room.find(params[:room_id])
+        @room = current_user.rooms.find(params[:room_id])
       end
     end
   end
