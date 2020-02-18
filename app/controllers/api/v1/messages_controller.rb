@@ -71,6 +71,7 @@ module Api
         @current_user ||= User.find(1)
       end
 
+      # TODO: refactor
       def set_room
         @room = Room.find(params[:room_id])
       end

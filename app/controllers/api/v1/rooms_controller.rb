@@ -1,33 +1,20 @@
 module Api
   module V1
-    class RoomsController < ApplicationController
-      PER_PAGE = 10
-
+    class RoomsController < BaseController
       rescue_from 'ActiveRecord::RecordNotFound' do
         render json: {
-          status: false, message: "Комната с id №#{params[:id]} не найдена"
+            status: false, message: "Комната с id №#{params[:id]} не найдена"
         }, status: 404
       end
 
-      rescue_from 'ActionController::ParameterMissing' do |exception|
-        render json: { status: false, message: exception.to_s }, status: 500
-      end
-
-      def index
+    def index
         rooms = current_user.rooms.order(updated_at: :desc)
-        if params.include? 'from'
-          rooms = rooms.where('updated_at < ?', DateTime.parse(params[:from]))
-        end
-        per_page = PER_PAGE
-        per_page = params[:size].to_i if params.include? :size
-        @has_next = rooms.count > per_page
-        @rooms = rooms.limit(per_page)
-        @last_room = @rooms.last
-        render :index
+        options, rooms = DataService.new(rooms, current_user).call(data_params)
+        render json: RoomSerializer.new(rooms, options)
       end
 
       def show
-        room = current_user.rooms.includes(:users).where(users: { id: current_user }).find(params[:id])
+        room = current_user.rooms.includes(:users).where(users: {id: current_user}).find(params[:id])
         render json: room
       end
 
@@ -42,11 +29,15 @@ module Api
         if room.save
           render json: room
         else
-          render json: { status: false, errors: room.errors }
+          render json: {status: false, errors: room.errors}
         end
       end
 
       private
+
+      def data_params
+        params.permit(:from, :to, :size)
+      end
 
       def room_params
         users = params.require(:room).permit(users: [])
