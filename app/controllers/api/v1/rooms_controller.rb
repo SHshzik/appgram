@@ -14,16 +14,21 @@ module Api
       end
 
       def index
+        options = {}
         rooms = current_user.rooms.order(updated_at: :desc)
         if params.include? 'from'
           rooms = rooms.where('updated_at < ?', DateTime.parse(params[:from]))
         end
         per_page = PER_PAGE
         per_page = params[:size].to_i if params.include? :size
-        @has_next = rooms.count > per_page
-        @rooms = rooms.limit(per_page)
-        @last_room = @rooms.last
-        render :index
+        if rooms.count > per_page
+          options[:links] = {
+            next: "/api/v1/rooms?from=#{@last_room.updated_at.iso8601(3)}",
+          }
+        end
+        rooms = rooms.limit(per_page)
+        @last_room = rooms.last
+        render json: MessageSerializer.new(rooms, options)
       end
 
       def show
