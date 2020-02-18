@@ -43,10 +43,6 @@ module Api
         users[:users].append current_user
         users
       end
-
-      def current_user
-        @current_user ||= User.find(1)
-      end
     end
   end
 end

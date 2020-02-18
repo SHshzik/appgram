@@ -46,10 +46,6 @@ module Api
         params.require(:message).permit(:msg)
       end
 
-      def current_user
-        @current_user ||= User.find(1)
-      end
-
       def current_room
         @room = Room.find(params[:room_id])
       end
