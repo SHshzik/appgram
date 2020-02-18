@@ -3,41 +3,39 @@ module Api
     class MessagesController < BaseController
 
       rescue_from 'ActiveRecord::RecordNotFound' do
-        render json: {
-          status: false, message: "Комната с id №#{params[:room_id]} не найдена"
-        }, status: 404
+        render json: { status: false, message: "Комната с id №#{params[:room_id]} не найдена" }, status: :not_found
       end
 
       def index
         messages = current_room.messages.order(updated_at: :desc)
         get_messages = GetMessages.new(messages, current_user, current_room)
         options, messages = get_messages.call(data_params)
-        render json: MessageSerializer.new(messages, options)
+        render json: MessageSerializer.new(messages, options), status: :ok
       end
 
       def create
         message = current_room.messages.new(message_params)
         message.sender_id = current_user.id
         if message.save
-          render json: message
+          render json: message, status: :created
         else
-          render json: { status: false, errors: message.errors }
+          render json: { status: false, errors: message.errors }, status: :bad_request
         end
       end
 
       def update
         message = Message.find(params[:id])
         if message.update_attributes(message_params)
-          render json: message
+          render json: message, status: :ok
         else
-          render json: { status: false, errors: message.errors }
+          render json: { status: false, errors: message.errors }, status: :bad_request
         end
       end
 
       def destroy
         message = current_room.messages.where(sender_id: current_user.id).find(params[:id])
         message.destroy
-        render json: {}, status: :ok
+        render status: :no_content
       end
 
       private

@@ -8,7 +8,7 @@ module Api
       # end
 
       rescue_from 'ActionController::ParameterMissing' do |exception|
-        render json: {status: false, message: exception.to_s}, status: 500
+        render json: { status: false, message: exception.to_s }, status: :bad_request
       end
 
       private
