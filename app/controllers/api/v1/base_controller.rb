@@ -10,7 +10,12 @@ module Api
       rescue_from 'ActionController::ParameterMissing' do |exception|
         render json: {status: false, message: exception.to_s}, status: 500
       end
-    end
 
+      private
+
+      def data_params
+        params.permit(:from, :to, :size)
+      end
+    end
   end
 end

@@ -1,8 +1,6 @@
 module Api
   module V1
-    class MessagesController < ApplicationController
-      PER_PAGE = 10
-      before_action :set_room
+    class MessagesController < BaseController
 
       rescue_from 'ActiveRecord::RecordNotFound' do
         render json: {
@@ -10,29 +8,14 @@ module Api
         }, status: 404
       end
 
-      rescue_from 'ActionController::ParameterMissing' do |exception|
-        render json: { status: false, message: exception.to_s }, status: 500
-      end
-
       def index
-        messages = @room.messages.order(updated_at: :desc)
-        if params.include? 'from'
-          messages = messages.where('updated_at < ?', DateTime.parse(params[:from]))
-        end
-        if params.include? 'to'
-          messages = messages.where('updated_at > ?', DateTime.parse(params[:to]))
-        end
-        per_page = PER_PAGE
-        per_page = params[:size].to_i if params.include? :size
-        @has_next = messages.count > per_page
-        @messages = messages.limit(per_page)
-        @last_message = @messages.last
-        render json: MessageSerializer.new(@messages)
+        messages = current_room.messages.order(updated_at: :desc)
+        options, messages = DataService.new(messages, current_user).call(data_params)
+        render json: MessageSerializer.new(messages, options)
       end
 
       def create
-        message = Message.new(message_params)
-        message.room = @room
+        message = current_room.messages.new(message_params)
         message.sender_id = current_user.id
         if message.save
           render json: message
@@ -51,7 +34,7 @@ module Api
       end
 
       def destroy
-        message = @room.messages.where(sender_id: current_user.id).find(params[:id])
+        message = current_room.messages.where(sender_id: current_user.id).find(params[:id])
         message.destroy
         render json: {}, status: :ok
       end
@@ -66,8 +49,7 @@ module Api
         @current_user ||= User.find(1)
       end
 
-      # TODO: refactor
-      def set_room
+      def current_room
         @room = Room.find(params[:room_id])
       end
     end

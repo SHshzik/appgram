@@ -35,10 +35,6 @@ module Api
 
       private
 
-      def data_params
-        params.permit(:from, :to, :size)
-      end
-
       def room_params
         users = params.require(:room).permit(users: [])
         users[:users] = users[:users].map do |user_id|
