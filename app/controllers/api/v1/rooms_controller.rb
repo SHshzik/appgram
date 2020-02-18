@@ -9,18 +9,7 @@ module Api
 
     def index
         rooms = current_user.rooms.order(updated_at: :desc)
-        if params.include? 'from'
-          rooms = rooms.where('updated_at < ?', DateTime.parse(params[:from]))
-        end
-        per_page = PER_PAGE
-        per_page = params[:size].to_i if params.include? :size
-        @last_room = rooms.last
-        if rooms.count > per_page
-          options[:links] = {
-              next: "/api/v1/rooms?from=#{@last_room.updated_at.iso8601(3)}",
-          }
-        end
-        rooms = rooms.limit(per_page)
+        options, rooms = DataService.new(rooms, current_user).call(data_params)
         render json: RoomSerializer.new(rooms, options)
       end
 
@@ -45,6 +34,10 @@ module Api
       end
 
       private
+
+      def data_params
+        params.permit(:from, :to, :size)
+      end
 
       def room_params
         users = params.require(:room).permit(users: [])
