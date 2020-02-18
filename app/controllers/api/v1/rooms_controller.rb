@@ -1,24 +1,13 @@
 module Api
   module V1
-    class RoomsController < ApplicationController
-      PER_PAGE = 10
-
+    class RoomsController < BaseController
       rescue_from 'ActiveRecord::RecordNotFound' do
         render json: {
             status: false, message: "Комната с id №#{params[:id]} не найдена"
         }, status: 404
       end
 
-      rescue_from 'ActionController::ParameterMissing' do |exception|
-        render json: {status: false, message: exception.to_s}, status: 500
-      end
-
-      def index
-        options = {
-            params: {
-                current_user: current_user
-            },
-        }
+    def index
         rooms = current_user.rooms.order(updated_at: :desc)
         if params.include? 'from'
           rooms = rooms.where('updated_at < ?', DateTime.parse(params[:from]))
