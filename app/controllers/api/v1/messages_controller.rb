@@ -27,13 +27,8 @@ module Api
         @has_next = messages.count > per_page
         @messages = messages.limit(per_page)
         @last_message = @messages.last
-        render :index
+        render json: MessageSerializer.new(@messages)
       end
-
-      # def show
-      #   message = Message.find(params[:id])
-      #   render json: message
-      # end
 
       def create
         message = Message.new(message_params)
