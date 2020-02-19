@@ -29,7 +29,7 @@ module Api
         if room.save
           render json: room, status: :created
         else
-          render json: { status: false, errors: room.errors }, status: :bad_request
+          render json: room.errors, status: :bad_request
         end
       end
 
