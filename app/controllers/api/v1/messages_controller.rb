@@ -1,6 +1,7 @@
 module Api
   module V1
     class MessagesController < BaseController
+      before_action :build_form, only: [:update, :create]
 
       rescue_from 'ActiveRecord::RecordNotFound' do
         render json: { status: false, message: "Комната с id №#{params[:room_id]} не найдена" }, status: :not_found
@@ -14,21 +15,18 @@ module Api
       end
 
       def create
-        message = current_room.messages.new(message_params)
-        message.sender_id = current_user.id
-        if message.save
-          render json: message, status: :created
+        if @form.valid?
+          render json: @form.create, status: :created
         else
-          render json: { status: false, errors: message.errors }, status: :bad_request
+          render json: @form.errors, status: :bad_request
         end
       end
 
       def update
-        message = Message.find(params[:id])
-        if message.update_attributes(message_params)
-          render json: message, status: :ok
+        if @form.valid?
+          render json: @form.update, status: :accepted
         else
-          render json: { status: false, errors: message.errors }, status: :bad_request
+          render json: @form.errors, status: :bad_request
         end
       end
 
@@ -46,6 +44,15 @@ module Api
 
       def current_room
         @room = current_user.rooms.find(params[:room_id])
+      end
+
+      def build_form
+        @form = MessageForm.new(
+          message: Message.where(id: params[:id]).first,
+          msg: message_params[:msg],
+          user: current_user,
+          room: current_room
+        )
       end
     end
   end
