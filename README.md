@@ -1,24 +1,184 @@
-# README
+# Описание
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Приложение Appgram это мессенджер позволяющий быстро и анонимно общаться с друзьями как через приложение так и браузер.
 
-Things you may want to cover:
+### Версия Ruby on Rails
+```
+'~> 5.0.7'
+```
+### Для запуска проекта выполните следующие команды
+```
+1. bundle
+2. rails db:setup
+3. rails server
+```
 
-* Ruby version
+---
 
-* System dependencies
+## Описание API
 
-* Configuration
+### Комнаты
 
-* Database creation
+#### Получить первые 10 комнат текущего пользователя
 
-* Database initialization
+URL запроса: **GET /api/v1/room/**
 
-* How to run the test suite
+Статус ответа: **200**
 
-* Services (job queues, cache servers, search engines, etc.)
+Тело ответа:
 
-* Deployment instructions
+```
+{
+  "data": [
+    {
+      "id": "100",  # ID комнаты
+      "type": "room",
+      "attributes": {
+        "created_at": "2020-02-17T16:22:43.450Z",
+        "updated_at": "2020-02-17T16:22:43.450Z",
+        "last_message": "Qui a culpa maiores?",  # Последнее сообщение в комнате
+        "unread_messages": 1  # Колличество не прочитанных сообщений
+      }
+    },
+    ...
+  ],
+  "links": {
+    "next": "/api/v1/rooms?from=2020-02-17T16:22:43.056Z",  # Следующие 10 комнат ( старые )
+    "prev": "/api/v1/rooms?to=2020-02-17T16:22:43.450Z"  # Предыдущие 10 комнат ( новые )
+  }
+}
+```
 
-* ...
+#### Удалить комнату
+
+URL запроса: **DELETE /api/v1/room/[:id]**
+
+Статус ответа: **204**
+
+#### Создать комнату
+
+URL запроса: **POST /api/v1/room**
+
+Content-Type: application/json
+
+Тело запроса:
+
+```
+{
+  "room": {
+    "users": [2, 3, 4]  # Перечисленные через запятую ID пользователей, текущий пользователь автоматически добавится в комнату
+  }
+}
+```
+
+Статус ответа: **201**
+
+Тело ответа:
+```
+{
+  "id": 101,  # ID новой комнаты
+  "created_at": "2020-02-20T15:44:41.717Z",
+  "updated_at": "2020-02-20T15:44:41.717Z"
+}
+```
+
+### Сообщения
+
+#### Получить первые 10 сообщений в комнате
+
+URL запроса: **GET /api/v1/room/[:room_id]/messages**
+
+Статус ответа: **200**
+
+Тело ответа:
+
+```
+{
+  "data": [
+    {
+      "id": "304",  # ID сообщения
+      "type": "message",
+      "attributes": {
+        "msg": "12333",  # текст 
+        "status": false,  # прочитан или нет
+        "sender_id": 1,  # ID отправителя
+        "created_at": "2020-02-19T17:27:08.201Z",
+        "updated_at": "2020-02-19T17:27:23.554Z"
+      }
+    },
+    ...
+  ],
+  "links": {
+    "next": "/api/v1/rooms/100/messages?from=2020-02-17T16:22:43.470Z",  # Следующие 10 сообщений ( старые )
+    "prev": "/api/v1/rooms/100/messages?to=2020-02-19T17:27:23.554Z"  # Предыдущие 10 сообщений ( новые )
+  }
+}
+```
+
+#### Удалить сообщение
+
+URL запроса: **DELETE /api/v1/room/[:room_id]/messages/[:id]**
+
+Статус ответа: **204**
+
+#### Создать сообщение
+
+URL запроса: **POST /api/v1/room/[:room_id]/messages**
+
+Content-Type: application/json
+
+Тело запроса:
+
+```
+{
+  "message": {
+    "msg": "Текст сообщения"  # параметр обязателен и должен быть больше 1 символа
+  }
+}
+```
+
+Статус ответа: **201**
+
+Тело ответа:
+```
+{
+  "id": 305,
+  "msg": "asd",
+  "status": false,
+  "sender_id": 1,
+  "room_id": 100,
+  "created_at": "2020-02-20T16:11:07.098Z",
+  "updated_at": "2020-02-20T16:11:07.098Z"
+}
+```
+
+#### Обновить сообщение
+
+URL запроса: **PUT /api/v1/room/[:room_id]/messages/[:id]**
+
+Content-Type: application/json
+
+Тело запроса:
+
+```
+{
+  "message": {
+    "msg": "Новый текст сообщения"  # параметр обязателен и должен быть больше 1 символа
+  }
+}
+```
+
+Статус ответа: **202**
+
+Тело ответа:
+```
+{
+  "id": 305,
+  "msg": "asd",
+  "status": false,
+  "sender_id": 1,
+  "room_id": 100,
+  "created_at": "2020-02-20T16:11:07.098Z",
+  "updated_at": "2020-02-20T16:11:07.098Z"
+}
+```
