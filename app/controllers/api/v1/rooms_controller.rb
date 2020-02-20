@@ -1,48 +1,35 @@
 module Api
   module V1
-    class RoomsController < ApplicationController
-      PER_PAGE = 10
-
+    class RoomsController < BaseController
       rescue_from 'ActiveRecord::RecordNotFound' do
         render json: {
           status: false, message: "Комната с id №#{params[:id]} не найдена"
-        }, status: 404
-      end
-
-      rescue_from 'ActionController::ParameterMissing' do |exception|
-        render json: { status: false, message: exception.to_s }, status: 500
+        }, status: :not_found
       end
 
       def index
         rooms = current_user.rooms.order(updated_at: :desc)
-        if params.include? 'from'
-          rooms = rooms.where('updated_at < ?', DateTime.parse(params[:from]))
-        end
-        per_page = PER_PAGE
-        per_page = params[:size].to_i if params.include? :size
-        @has_next = rooms.count > per_page
-        @rooms = rooms.limit(per_page)
-        @last_room = @rooms.last
-        render :index
+        options, rooms = GetRooms.new(rooms, current_user).call(data_params)
+        render json: RoomSerializer.new(rooms, options), status: :ok
       end
 
       def show
         room = current_user.rooms.includes(:users).where(users: { id: current_user }).find(params[:id])
-        render json: room
+        render json: room, status: :ok
       end
 
       def destroy
         room = current_user.rooms.find(params[:id])
         room.destroy
-        render json: {}, status: :ok
+        render status: :no_content
       end
 
       def create
         room = Room.new(room_params)
         if room.save
-          render json: room
+          render json: room, status: :created
         else
-          render json: { status: false, errors: room.errors }
+          render json: room.errors, status: :bad_request
         end
       end
 
@@ -55,10 +42,6 @@ module Api
         end
         users[:users].append current_user
         users
-      end
-
-      def current_user
-        @current_user ||= User.find(1)
       end
     end
   end

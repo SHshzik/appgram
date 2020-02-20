@@ -1,64 +1,39 @@
 module Api
   module V1
-    class MessagesController < ApplicationController
-      PER_PAGE = 10
-      before_action :set_room
+    class MessagesController < BaseController
+      before_action :build_form, only: [:update, :create]
 
       rescue_from 'ActiveRecord::RecordNotFound' do
-        render json: {
-          status: false, message: "Комната с id №#{params[:room_id]} не найдена"
-        }, status: 404
-      end
-
-      rescue_from 'ActionController::ParameterMissing' do |exception|
-        render json: { status: false, message: exception.to_s }, status: 500
+        render json: { status: false, message: "Комната с id №#{params[:room_id]} не найдена" }, status: :not_found
       end
 
       def index
-        messages = @room.messages.order(updated_at: :desc)
-        if params.include? 'from'
-          messages = messages.where('updated_at < ?', DateTime.parse(params[:from]))
-        end
-        if params.include? 'to'
-          messages = messages.where('updated_at > ?', DateTime.parse(params[:to]))
-        end
-        per_page = PER_PAGE
-        per_page = params[:size].to_i if params.include? :size
-        @has_next = messages.count > per_page
-        @messages = messages.limit(per_page)
-        @last_message = @messages.last
-        render :index
+        messages = current_room.messages.order(updated_at: :desc)
+        get_messages = GetMessages.new(messages, current_user, current_room)
+        options, messages = get_messages.call(data_params)
+        render json: MessageSerializer.new(messages, options), status: :ok
       end
 
-      # def show
-      #   message = Message.find(params[:id])
-      #   render json: message
-      # end
-
       def create
-        message = Message.new(message_params)
-        message.room = @room
-        message.sender_id = current_user.id
-        if message.save
-          render json: message
+        if @form.valid?
+          render json: @form.create, status: :created
         else
-          render json: { status: false, errors: message.errors }
+          render json: @form.errors, status: :bad_request
         end
       end
 
       def update
-        message = Message.find(params[:id])
-        if message.update_attributes(message_params)
-          render json: message
+        if @form.valid?
+          render json: @form.update, status: :accepted
         else
-          render json: { status: false, errors: message.errors }
+          render json: @form.errors, status: :bad_request
         end
       end
 
       def destroy
-        message = @room.messages.where(sender_id: current_user.id).find(params[:id])
+        message = current_room.messages.where(sender_id: current_user.id).find(params[:id])
         message.destroy
-        render json: {}, status: :ok
+        render status: :no_content
       end
 
       private
@@ -67,12 +42,17 @@ module Api
         params.require(:message).permit(:msg)
       end
 
-      def current_user
-        @current_user ||= User.find(1)
+      def current_room
+        @room = current_user.rooms.find(params[:room_id])
       end
 
-      def set_room
-        @room = Room.find(params[:room_id])
+      def build_form
+        @form = MessageForm.new(
+          message: Message.where(id: params[:id]).first,
+          msg: message_params[:msg],
+          user: current_user,
+          room: current_room
+        )
       end
     end
   end
