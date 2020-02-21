@@ -14,7 +14,7 @@ module Api
       end
 
       def show
-        room = current_user.rooms.includes(:users).where(users: { id: current_user }).find(params[:id])
+        room = current_user.rooms.find(params[:id])
         render json: room, status: :ok
       end
 
